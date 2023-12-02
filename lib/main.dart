@@ -97,7 +97,6 @@ class DbHelper {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -134,7 +133,6 @@ class _MyHomePageState extends State<MyHomePage> {
     await _addAllFoods();
   }
 
-  // Add multiple food items and calories to the database
   Future<void> _addAllFoods() async {
     List<Map<String, dynamic>> foods = [
       {'name': 'Apple', 'calories': 52},
@@ -213,10 +211,10 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MealPlan {
-  late int id; // ID for meal plan in the database
+  late int id;
   late String date;
   late int targetCalories;
-  late List<Map<String, dynamic>> selectedFoods; // List of selected food items
+  late List<Map<String, dynamic>> selectedFoods;
 }
 
 class ScreenOne extends StatefulWidget {
@@ -226,7 +224,7 @@ class ScreenOne extends StatefulWidget {
 
 class _ScreenOneState extends State<ScreenOne> {
   late DbHelper _dbHelper;
-  late int targetCalories = 2000; // Default target calories
+  late int targetCalories = 2000;
   late DateTime selectedDate = DateTime.now();
   List<Map<String, dynamic>> selectedFoods = [];
   List<Map<String, dynamic>> foods = [];
@@ -264,7 +262,6 @@ class _ScreenOneState extends State<ScreenOne> {
           selectedFoods.add(food);
         });
       } else {
-        // Show a message or handle the case where the food exceeds target calories
         print('Adding this item exceeds the target calories!');
       }
     } else {
@@ -273,7 +270,6 @@ class _ScreenOneState extends State<ScreenOne> {
       });
     }
 
-    // Refresh available food items list based on remaining calories
     int remainingCalories = targetCalories - calculateTotalCalories();
     setState(() {
       foods = filterFoodItems(remainingCalories);
@@ -379,7 +375,6 @@ class _ScreenOneState extends State<ScreenOne> {
 
           Text('Remaining Calories: $remainingCalories'),
 
-          // Plausible food items using FutureBuilder
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: _fetchPlausibleFoods(remainingCalories),
@@ -412,7 +407,7 @@ class _ScreenOneState extends State<ScreenOne> {
                               onPressed: () {
                                 setState(() {
                                   quantities[foodId] = quantity + 1;
-                                  _toggleFoodSelection(food, true); // Toggle with quantity update
+                                  _toggleFoodSelection(food, true);
                                 });
                               },
                               child: Text('Add'),
@@ -451,16 +446,16 @@ class ScreenTwo extends StatelessWidget {
 }
 
 class ScreenThree extends StatelessWidget {
-  final DbHelper _dbHelper = DbHelper(); // Create DbHelper instance
+  final DbHelper _dbHelper = DbHelper();
 
   Future<List<Map<String, dynamic>>> _getAllFoods() async {
-    await _dbHelper.initializeDatabase(); // Initialize the database
-    return await _dbHelper.getAllFoods(); // Fetch all entries from the database
+    await _dbHelper.initializeDatabase();
+    return await _dbHelper.getAllFoods();
   }
 
   Future<void> _showUpdateCaloriesDialog(BuildContext context, Map<String, dynamic> food) async {
     TextEditingController caloriesController = TextEditingController();
-    caloriesController.text = food['calories'].toString(); // Initialize with current calories
+    caloriesController.text = food['calories'].toString();
 
     await showDialog(
       context: context,
@@ -481,7 +476,6 @@ class ScreenThree extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Update the calories for the selected entry
                 int newCalories = int.tryParse(caloriesController.text) ?? 0;
                 _dbHelper.updateFood(food['id'], newCalories);
                 Navigator.of(context).pop();
@@ -529,7 +523,6 @@ class ScreenThree extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Add the new entry to the database
                 String name = nameController.text;
                 int calories = int.tryParse(caloriesController.text) ?? 0;
                 _dbHelper.insertFood(name, calories);
@@ -537,7 +530,6 @@ class ScreenThree extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Entry added')),
                 );
-                // Refresh the UI after addition
                 Scaffold.of(context).setState(() {});
               },
               child: Text('Add'),
@@ -556,7 +548,7 @@ class ScreenThree extends StatelessWidget {
         title: Text('Food Items'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _getAllFoods(), // Call the function to get all entries
+        future: _getAllFoods(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -565,7 +557,6 @@ class ScreenThree extends StatelessWidget {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('No data available'));
           } else {
-            // Display the list of entries
             return ListView.builder(
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
@@ -574,18 +565,15 @@ class ScreenThree extends StatelessWidget {
                   title: Text(food['name']),
                   subtitle: Text('Calories: ${food['calories']}'),
                   onTap: () {
-                    // Show the dialog to update calories on tap
                     _showUpdateCaloriesDialog(context, food);
                   },
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () {
-                      // Delete the entry on button press
                       _dbHelper.deleteFood(food['id']);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Entry deleted')),
                       );
-                      // Refresh the UI after deletion
                       Scaffold.of(context).setState(() {});
                     },
                   ),
